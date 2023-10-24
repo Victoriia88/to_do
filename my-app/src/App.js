@@ -1,60 +1,99 @@
 import React, { useState } from "react";
+import { connect } from "react-redux";
+import { addTodo, deleteTodo, toggleTodo, editTodo } from "./Redux/actions";
+
 import "./App.css";
 
-function App() {
-  const [todos, setTodos] = useState([]);
+function App(props) {
   const [todoText, setTodoText] = useState("");
+  const [editedText, setEditedText] = useState("");
+  const [editedIndex, setEditedIndex] = useState(null);
 
-  const addTodo = () => {
+  const handleAddTodo = (e) => {
+    e.preventDefault();
     if (todoText) {
-      setTodos([...todos, { text: todoText, completed: false }]);
+      props.addTodo(todoText);
       setTodoText("");
     }
   };
 
-  const toggleTodo = (index) => {
-    const newTodos = [...todos];
-    newTodos[index].completed = !newTodos[index].completed;
-    setTodos(newTodos);
+  const handleToggleTodo = (index) => {
+    props.toggleTodo(index);
   };
 
-  function handleDeleteFactory(id) {
-    const newList = [...todos];
-    newList.splice(id, 1);
-    setTodos(newList);
-  }
+  const handleDeleteTodo = (index) => {
+    props.deleteTodo(index);
+  };
+
+  const handleEditTodo = (index) => {
+    setEditedIndex(index);
+    setEditedText(props.todos[index].text);
+  };
+
+  const handleSaveTodo = (index) => {
+    props.editTodo(index, editedText);
+    setEditedIndex(null);
+  };
 
   return (
     <div className="App">
       <h1>Todo List</h1>
       <div>
         <ul>
-          {todos.map((todo, index) => (
+          {props.todos.map((todo, index) => (
             <div className="item" key={index}>
               <li
                 style={{
                   textDecoration: todo.completed ? "line-through" : "none",
                 }}
-                onClick={() => toggleTodo(index)}
+                onClick={() => handleToggleTodo(index)}
               >
-                {todo.text}
+                {index === editedIndex ? (
+                  <input
+                    type="text"
+                    value={editedText}
+                    onChange={(e) => setEditedText(e.target.value)}
+                  />
+                ) : (
+                  todo.text
+                )}
               </li>
-              <button onClick={() => handleDeleteFactory(index)}>Delete</button>
+              {index === editedIndex ? (
+                <button onClick={() => handleSaveTodo(index)}>Save</button>
+              ) : (
+                <button onClick={() => handleEditTodo(index)}>Edit</button>
+              )}
+              <button onClick={() => handleDeleteTodo(index)}>Delete</button>
             </div>
           ))}
         </ul>
-        <div>
+        <form>
           <input
             type="text"
             placeholder="Enter a task"
             value={todoText}
             onChange={(e) => setTodoText(e.target.value)}
           />
-          <button onClick={addTodo}>Add</button>
-        </div>
+          <button type="submit" onClick={handleAddTodo}>
+            Add
+          </button>
+        </form>
       </div>
     </div>
   );
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    todos: state.todos,
+  };
+};
+
+const mapDispatchToProps = {
+  addTodo,
+  deleteTodo,
+  toggleTodo,
+  editTodo,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

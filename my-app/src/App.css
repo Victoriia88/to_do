@@ -38,8 +38,8 @@ li:hover {
 }
 
 input[type="text"] {
-  padding: 5px;
-  width: 60%;
+  padding: 10px;
+  width: 65%;
   border: 1px solid#8C7961;
   border-radius: 4px;
   margin-right: 10px;
